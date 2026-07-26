@@ -1,44 +1,64 @@
-# [Project name]
+# BTC VPN — Backend API Server
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+خادم API كامل لتطبيق BTC VPN على الأندرويد. يستخدم SQLite كقاعدة بيانات محلية (لا يتطلب DATABASE_URL).
 
 ## Run & Operate
 
-- `pnpm --filter @workspace/api-server run dev` — run the API server (port 5000)
-- `pnpm run typecheck` — full typecheck across all packages
-- `pnpm run build` — typecheck + build all packages
-- `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
-- `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
-- Required env: `DATABASE_URL` — Postgres connection string
+- `pnpm --filter @workspace/api-server run dev` — تشغيل API server (port 8080)
+- `pnpm run typecheck` — فحص TypeScript لجميع الحزم
+- `pnpm run build` — typecheck + build
 
 ## Stack
 
 - pnpm workspaces, Node.js 24, TypeScript 5.9
 - API: Express 5
-- DB: PostgreSQL + Drizzle ORM
-- Validation: Zod (`zod/v4`), `drizzle-zod`
-- API codegen: Orval (from OpenAPI spec)
-- Build: esbuild (CJS bundle)
+- DB: SQLite (better-sqlite3) — ملف `btc_vpn.sqlite` في جذر المشروع
+- Auth: JWT-style tokens (crypto.scrypt hashing)
+
+## API Endpoints
+
+جميع الـ endpoints تبدأ بـ `/api`:
+
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| POST | `/api/auth/login` | ❌ | تسجيل الدخول |
+| POST | `/api/auth/logout` | ✅ Bearer | تسجيل الخروج |
+| GET  | `/api/servers` | ✅ Bearer | جلب الشركات + السيرفرات + Spoof URLs |
+| POST | `/api/device/check` | ❌ | فحص/تسجيل الجهاز |
+| POST | `/api/detect-company` | ❌ | كشف الشركة من رقم الهاتف |
+| GET  | `/api/spoof-urls/company/:id` | ✅ Bearer | Spoof URLs لشركة معينة |
 
 ## Where things live
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+- `artifacts/api-server/src/lib/database.ts` — SQLite setup + schema + seed data
+- `artifacts/api-server/src/routes/auth.ts` — login / logout
+- `artifacts/api-server/src/routes/servers.ts` — GET servers
+- `artifacts/api-server/src/routes/device.ts` — device check
+- `artifacts/api-server/src/routes/detectCompany.ts` — detect company from phone
+- `artifacts/api-server/src/routes/spoofUrls.ts` — spoof URLs per company
 
-## Architecture decisions
+## Default Credentials
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
+- **Admin:** `admin` / `password`
+- **Demo:** `demo` / `demo123`
 
-## Product
+## Android App Integration
 
-_Describe the high-level user-facing capabilities of this app once they exist._
+في ملف `ApiClient.kt` في مشروع الأندرويد، غيّر:
+
+```kotlin
+const val BASE_URL = "https://<your-replit-domain>/"
+```
 
 ## User preferences
 
-_Populate as you build — explicit user instructions worth remembering across sessions._
+_Populate as you build._
 
 ## Gotchas
 
-_Populate as you build — sharp edges, "always run X before Y" rules._
+- قاعدة البيانات تُنشأ وتُملأ تلقائياً عند أول تشغيل
+- `spoof_urls` في رد `/api/servers` هي `Map<String, List>` حيث الـ key هو `company_id` كـ String (يطابق نموذج الأندرويد)
+- بعد تغيير كود السيرفر يجب إعادة تشغيل الـ workflow لإعادة البناء
 
 ## Pointers
 
