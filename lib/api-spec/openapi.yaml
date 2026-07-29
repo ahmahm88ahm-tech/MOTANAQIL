@@ -3,20 +3,31 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: BTC VPN Admin API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: auth
+    description: Authentication
+  - name: stats
+    description: Dashboard statistics
+  - name: users
+    description: User management
+  - name: companies
+    description: Company management
+  - name: servers
+    description: Server management
+  - name: spoofUrls
+    description: Spoof URL management
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,13 +35,641 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      summary: Login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginInput"
+      responses:
+        "200":
+          description: Login result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResult"
+
+  /auth/logout:
+    post:
+      operationId: logout
+      tags: [auth]
+      summary: Logout
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Logged out
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BaseResponse"
+
+  /stats:
+    get:
+      operationId: getStats
+      tags: [stats]
+      summary: Get dashboard statistics
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StatsResponse"
+
+  /users:
+    get:
+      operationId: getUsers
+      tags: [users]
+      summary: List all users
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: User list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UsersResponse"
+    post:
+      operationId: createUser
+      tags: [users]
+      summary: Create a user
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserInput"
+      responses:
+        "201":
+          description: Created user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+
+  /users/{id}:
+    patch:
+      operationId: updateUser
+      tags: [users]
+      summary: Update a user
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserUpdate"
+      responses:
+        "200":
+          description: Updated user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+    delete:
+      operationId: deleteUser
+      tags: [users]
+      summary: Delete a user
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BaseResponse"
+
+  /companies:
+    get:
+      operationId: getCompanies
+      tags: [companies]
+      summary: List companies
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Companies list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CompaniesResponse"
+    post:
+      operationId: createCompany
+      tags: [companies]
+      summary: Create a company
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CompanyInput"
+      responses:
+        "201":
+          description: Created company
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CompanyResponse"
+
+  /companies/{id}:
+    delete:
+      operationId: deleteCompany
+      tags: [companies]
+      summary: Delete a company
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BaseResponse"
+
+  /servers:
+    get:
+      operationId: getServers
+      tags: [servers]
+      summary: List servers with companies and spoof URLs
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Servers data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServersResponse"
+    post:
+      operationId: createServer
+      tags: [servers]
+      summary: Create a server
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ServerInput"
+      responses:
+        "201":
+          description: Created server
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServerResponse"
+
+  /servers/{id}:
+    delete:
+      operationId: deleteServer
+      tags: [servers]
+      summary: Delete a server
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BaseResponse"
+
+  /spoof-urls:
+    get:
+      operationId: getSpoofUrls
+      tags: [spoofUrls]
+      summary: List all spoof URLs
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Spoof URL list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SpoofUrlsResponse"
+    post:
+      operationId: createSpoofUrl
+      tags: [spoofUrls]
+      summary: Create a spoof URL
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SpoofUrlInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SpoofUrlResponse"
+
+  /spoof-urls/{id}:
+    delete:
+      operationId: deleteSpoofUrl
+      tags: [spoofUrls]
+      summary: Delete a spoof URL
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BaseResponse"
+
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+
   schemas:
     HealthStatus:
       type: object
+      required: [status]
       properties:
         status:
           type: string
-      required:
-        - status
 
+    BaseResponse:
+      type: object
+      required: [success, message]
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+
+    LoginInput:
+      type: object
+      required: [username, password]
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+        device_id:
+          type: ["string", "null"]
+        device_model:
+          type: ["string", "null"]
+        device_os:
+          type: ["string", "null"]
+
+    UserData:
+      type: object
+      required: [id, username, data_limit_mb]
+      properties:
+        id:
+          type: integer
+        username:
+          type: string
+        full_name:
+          type: ["string", "null"]
+        data_limit_mb:
+          type: integer
+        expiry_date:
+          type: ["string", "null"]
+
+    AuthResult:
+      type: object
+      required: [success, message, banned]
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        banned:
+          type: boolean
+        data:
+          type: ["object", "null"]
+          properties:
+            token:
+              type: string
+            user:
+              $ref: "#/components/schemas/UserData"
+
+    StatsResponse:
+      type: object
+      required: [success, users, companies, servers, spoof_urls, sessions]
+      properties:
+        success:
+          type: boolean
+        users:
+          type: integer
+        companies:
+          type: integer
+        servers:
+          type: integer
+        spoof_urls:
+          type: integer
+        sessions:
+          type: integer
+
+    User:
+      type: object
+      required: [id, username, role, status, data_limit_mb]
+      properties:
+        id:
+          type: integer
+        username:
+          type: string
+        full_name:
+          type: ["string", "null"]
+        role:
+          type: string
+        status:
+          type: string
+        data_limit_mb:
+          type: integer
+        expiry_date:
+          type: ["string", "null"]
+
+    UserInput:
+      type: object
+      required: [username, password]
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+        full_name:
+          type: ["string", "null"]
+        role:
+          type: string
+        data_limit_mb:
+          type: integer
+        expiry_date:
+          type: ["string", "null"]
+
+    UserUpdate:
+      type: object
+      properties:
+        full_name:
+          type: ["string", "null"]
+        password:
+          type: ["string", "null"]
+        role:
+          type: ["string", "null"]
+        status:
+          type: ["string", "null"]
+        data_limit_mb:
+          type: ["integer", "null"]
+        expiry_date:
+          type: ["string", "null"]
+
+    UserResponse:
+      type: object
+      required: [success]
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          $ref: "#/components/schemas/User"
+
+    UsersResponse:
+      type: object
+      required: [success, data]
+      properties:
+        success:
+          type: boolean
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/User"
+
+    Company:
+      type: object
+      required: [id, name, name_ar, is_active]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        name_ar:
+          type: string
+        logo_url:
+          type: ["string", "null"]
+        prefixes:
+          type: ["string", "null"]
+        is_active:
+          type: integer
+
+    CompanyInput:
+      type: object
+      required: [name, name_ar]
+      properties:
+        name:
+          type: string
+        name_ar:
+          type: string
+        logo_url:
+          type: ["string", "null"]
+        prefixes:
+          type: ["string", "null"]
+
+    CompanyResponse:
+      type: object
+      required: [success]
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          $ref: "#/components/schemas/Company"
+
+    CompaniesResponse:
+      type: object
+      required: [success, data]
+      properties:
+        success:
+          type: boolean
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Company"
+
+    Server:
+      type: object
+      required: [id, company_id, display_name, host, port, protocol, server_type, sni_hostname, payload]
+      properties:
+        id:
+          type: integer
+        company_id:
+          type: integer
+        server_number:
+          type: integer
+        display_name:
+          type: string
+        host:
+          type: string
+        port:
+          type: integer
+        protocol:
+          type: string
+        server_type:
+          type: string
+        sni_hostname:
+          type: string
+        payload:
+          type: string
+        company_name:
+          type: ["string", "null"]
+        is_active:
+          type: integer
+
+    ServerInput:
+      type: object
+      required: [company_id, display_name, host, sni_hostname, payload]
+      properties:
+        company_id:
+          type: integer
+        server_number:
+          type: integer
+        display_name:
+          type: string
+        host:
+          type: string
+        port:
+          type: integer
+        protocol:
+          type: string
+        server_type:
+          type: string
+        sni_hostname:
+          type: string
+        payload:
+          type: string
+
+    ServerResponse:
+      type: object
+      required: [success]
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          $ref: "#/components/schemas/Server"
+
+    ServersResponse:
+      type: object
+      required: [success, companies, servers]
+      properties:
+        success:
+          type: boolean
+        companies:
+          type: array
+          items:
+            $ref: "#/components/schemas/Company"
+        servers:
+          type: array
+          items:
+            $ref: "#/components/schemas/Server"
+        user:
+          $ref: "#/components/schemas/UserData"
+
+    SpoofUrl:
+      type: object
+      required: [id, company_id, url, is_active]
+      properties:
+        id:
+          type: integer
+        company_id:
+          type: integer
+        url:
+          type: string
+        description:
+          type: ["string", "null"]
+        is_active:
+          type: integer
+        company_name:
+          type: ["string", "null"]
+
+    SpoofUrlInput:
+      type: object
+      required: [company_id, url]
+      properties:
+        company_id:
+          type: integer
+        url:
+          type: string
+        description:
+          type: ["string", "null"]
+
+    SpoofUrlResponse:
+      type: object
+      required: [success]
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          $ref: "#/components/schemas/SpoofUrl"
+
+    SpoofUrlsResponse:
+      type: object
+      required: [success, data]
+      properties:
+        success:
+          type: boolean
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/SpoofUrl"
