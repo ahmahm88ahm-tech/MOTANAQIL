@@ -1,0 +1,6 @@
+{
+  "buildCommand": "pnpm --filter @workspace/btc-vpn-dashboard build",
+  "outputDirectory": "artifacts/btc-vpn-dashboard/dist/public",
+  "installCommand": "pnpm install",
+  "framework": "vite"
+}
